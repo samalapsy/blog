@@ -16,3 +16,21 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::get('/import-post', function () {
+        echo 'import post from third part url';
+    })->name('import-post');
+});
+
+require __DIR__.'/auth.php';
+
+
+Route::get('/{slug}', function () {
+    echo 'Post Details';
+});

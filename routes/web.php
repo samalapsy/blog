@@ -26,9 +26,6 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
         'index' => 'sort'
     ]);
     Route::resource('import-posts', ImportPostController::class)->only(['create', 'store']);
-    Route::get('/import-posts',[ImportPostController::class, 'create'])->name('import-posts.create');
-    Route::post('/import-posts',[ImportPostController::class, 'store'])->name('import-posts.store');
-
 });
 
 require __DIR__.'/auth.php';

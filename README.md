@@ -5,9 +5,10 @@ This is a simple blogging platform built on Laravel as it exhibit the following 
 
 - Caching
 - Queues
+- Jobs
+- Commands
 - PHPUnit Testing
-- Remote HTTP Call
-- Design Pattern for scalability
+- Remote HTTP Call via HTTP Clieints
 
 
 ## Env Variables
@@ -26,10 +27,13 @@ Ensure you have the following prerequisite on your machine
 
 - PHP >=7.3 AND <= 8.0
 - MySQL
+- Redis (optional, needed only when you are using rdis for queues and caching)
 - Run `php artisan key:generate`
 - Run `php artisan migrate --seed`
 - Run `php artisan route:cache`
 - Run `php artisan config:cache`
+
+### To execute the Background jobs, run the following command
 - Run `php artisan schedule:work`
 - Run `php artisan queue:work --tries=3 --timeout=60`
 - Run `php artisan queue:retry all`

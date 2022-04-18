@@ -13,10 +13,22 @@
         <!-- Styles -->
         <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
+        @yield('seo')
+
         <!-- Scripts -->
         <script src="{{ asset('js/app.js') }}" defer></script>
     </head>
     <body class="font-sans antialiased">
+        <script type="application/ld+json">
+            {
+                "@context": "http://schema.org",
+                "@type": "WebSite",
+                "name": "Demo Blog",
+                "alternateName": "The Blog",
+                "url": "{{ route('index') }}"
+            }
+        </script>
+
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
@@ -31,6 +43,12 @@
             <main>
                 {{ $slot }}
             </main>
+
         </div>
+        
+
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        @stack('scripts')
+        
     </body>
 </html>

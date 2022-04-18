@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\HomePageController;
+use App\Http\Controllers\ImportPostController;
+use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,24 +16,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomePageController::class, 'index'])->name('index');
 
+Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
+    
+    Route::get('/', [PostController::class, 'index']);
+    
+    Route::resource('posts', PostController::class)->only(['index', 'create', 'store', 'show'])->parameters([
+        'index' => 'sort'
+    ]);
+    Route::resource('import-posts', ImportPostController::class)->only(['create', 'store']);
+    Route::get('/import-posts',[ImportPostController::class, 'create'])->name('import-posts.create');
+    Route::post('/import-posts',[ImportPostController::class, 'store'])->name('import-posts.store');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
-    Route::get('/import-post', function () {
-        echo 'import post from third part url';
-    })->name('import-post');
 });
 
 require __DIR__.'/auth.php';
 
-
-Route::get('/{slug}', function () {
-    echo 'Post Details';
-});
+Route::get('/{post}', [HomePageController::class, 'showPost'])->name('post-details');

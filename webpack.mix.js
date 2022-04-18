@@ -1,5 +1,7 @@
 const mix = require('laravel-mix');
 
+mix.disableSuccessNotifications();
+
 /*
  |--------------------------------------------------------------------------
  | Mix Asset Management
@@ -15,4 +17,8 @@ mix.js('resources/js/app.js', 'public/js').postCss('resources/css/app.css', 'pub
     require('postcss-import'),
     require('tailwindcss'),
     require('autoprefixer'),
-]);
+]).sass('resources/sass/app.scss', 'public/css');
+
+if (mix.inProduction()) {
+    mix.version();
+}

@@ -3,14 +3,18 @@
 namespace Tests\Feature\Jobs;
 
 use App\Jobs\ImportPostJob;
+use App\Models\Post;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 use Mockery;
+use Mockery\Mock;
 use Mockery\MockInterface;
 
 class ImportPostJobTest extends TestCase
@@ -35,8 +39,8 @@ class ImportPostJobTest extends TestCase
 
     protected function tearDown(): void {
         parent::tearDown();
+        Mockery::close();
         unset($this->user, $this->create_route, $this->store_route);
-        \Mockery::close();
     }
 
     public function test_import_post_screen_can_be_rendered()
@@ -73,7 +77,7 @@ class ImportPostJobTest extends TestCase
 
     public function test_job_was_not_pushed()
     {
-        $response = $this->actingAs($this->user)
+        $this->actingAs($this->user)
             ->from(route($this->create_route))
             ->post(route('dashboard.import-posts.store'), [ 
                 'import_post' => 'continue'
@@ -88,35 +92,13 @@ class ImportPostJobTest extends TestCase
     public function test_import_from_endpoint()
     {
 
-        // ImportPostJob::dispatch();
-        // $mock = $this->mock(ImportPostJob::class, function (MockInterface $mock) {
-        //     $mock->shouldReceive('process')->once();
-        // });
-
-        Http::fake([
-            Config::get('blog.remote_blog_post_import_url') => Http::response(
-                [
-                    'data' => [
-                        [
-                            'title' => "Est omnis beatae aut officiis.",
-                            'description' => "Delectus et voluptatum minus harum perferendis unde optio commodi. Quia eaque modi impedit qui praesentium in omnis ab voluptas. Nihil officiis eveniet aspernatur labore et. Voluptate officiis corporis reiciendis corporis ullam non. Non asperiores recusandae veritatis. Culpa iure corrupti sit amet omnis.",
-                            'publication_date' => "2022-04-18 16:38:47"
-                        ],
-                        [
-                            'title' => "Neque asperiores beatae quam fugiat voluptatibus dolorem.",
-                            'description' => "Ut maxime velit repellat inventore fugiat inventore. Molestiae suscipit dignissimos eum accusantium illo. Quas voluptate quae assumenda aut sit et.",
-                            'publication_date' => "2022-04-18 21:38:28"
-                        ],
-                        [
-                            'title' => "Nam molestias sit blanditiis eum.",
-                            'description' => "Temporibus ipsam et odio cumque vel nam. Cupiditate eum quo laborum dignissimos alias minima explicabo. Dolor quo incidunt est odit dolor eos sit tenetur.",
-                            'publication_date' => "2022-04-18 15:14:46"
-                        ]
-                    ]
-                ], 200, ['Headers'])
-        ]);
-        
+        Http::fake();
+        /* $mock_response = $this->mock(ImportPostJob::class, function (MockInterface $mock) {
+            $mock->shouldReceive('dispatch')->once()->andReturn(1);
+        });
+        ImportPostJob::dispatch(); */
         Http::asJson();
+        
     }
 
 

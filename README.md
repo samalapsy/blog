@@ -1,7 +1,7 @@
 
 ## Simple Blogging Platform
 
-This is a simple blogging platform built on Laravel. See breif [here](https://www.notion.so/Web-Developer-0cdf0bb1015d4e5c94b62b3fe61ee621)
+This is a simple blogging platform built on Laravel based on the briefing [here](https://www.notion.so/Web-Developer-0cdf0bb1015d4e5c94b62b3fe61ee621).
 ## Env Variables
 Add or update the following env varaibles.
 
@@ -29,6 +29,10 @@ Ensure you have the following prerequisite on your machine
 
 - Run `npm install`
 - Run `npm run prod`
+
+
+### For Testing
+- Run `php artisan test`
 
 ### To execute the Background jobs, run the following command
 - Run `php artisan schedule:work`

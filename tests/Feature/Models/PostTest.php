@@ -22,6 +22,8 @@ class PostTest extends TestCase
     protected $user;
     protected $post;
     protected $posts;
+    protected $store_route= 'dashboard.posts.store';
+    protected $create_route= 'dashboard.posts.create';
 
     protected function setUp() : void
     {
@@ -33,21 +35,22 @@ class PostTest extends TestCase
         $this->assertModelExists($this->user);
     }
 
+    protected function tearDown(): void {
+        parent::tearDown();
+        unset($this->user, $this->posts, $this->post, $this->create_route, $this->store_route);
+    }
+
   
     public function test_a_user_can_read_all_posts()
     {
         $this->assertDatabaseHas('users', [
             'email' => $this->user->email,
-        ]);
-        $this->assertDatabaseCount('posts', 20);
-        $response = $this->get('/');
-        $response->assertStatus(200);
-
+        ])->assertDatabaseCount('posts', 20)->get('/')->assertStatus(200);
     }
 
     public function test_post_create_screen_can_be_rendered()
     {
-        $response = $this->actingAs($this->user)->get(route('dashboard.posts.create'));
+        $response = $this->actingAs($this->user)->get(route($this->create_route));
         $response->assertStatus(200);
     }
 
@@ -55,11 +58,9 @@ class PostTest extends TestCase
     {
         $this->assertDatabaseHas('users', [
             'email' => $this->user->email,
-        ]);
-        $this->be($this->user);
+        ])->actingAs($this->user);
         $post = Post::factory()->for($this->user)->create();
-        $response = $this->get('/'. $post->slug);
-        $response->assertSee($post->title);
+        $response = $this->get('/'. $post->slug)->assertSee($post->title);
     }
 
 
@@ -68,9 +69,11 @@ class PostTest extends TestCase
         
         $post = $this->post->toArray();
         unset($post['title']);
-        $response = $this->actingAs($this->user)->followingRedirects()->post(route('dashboard.posts.store'),$post);
-        
-        $response->assertStatus(200);
+        $response = $this->actingAs($this->user)->from(route($this->create_route))
+        ->post(route($this->store_route),$post);
+        $response->assertStatus(302)
+        ->assertSessionHasErrors(['title' => 'The title field is required.'])
+        ->assertRedirect(route($this->create_route));
     }
 
 
@@ -78,22 +81,22 @@ class PostTest extends TestCase
     {
         $post = $this->post->toArray();
         $post['title'] = $post['title'] . rand(2323,43434);
+        $this->actingAs($this->user)
+            ->from(route($this->create_route))
+            ->post(route($this->store_route),$post)
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors();
 
-        $response = $this->actingAs($this->user)->followingRedirects()->post(route('dashboard.posts.store'),$post);
-        $response->assertSuccessful();
-        $response->assertStatus(200);
         $this->assertEquals(21,Post::all()->count());
     }
 
     public function test_authenticated_should_not_be_able_to_edit_a_post()
     {
-        $response = $this->actingAs($this->user)->put('/dashboard/'. $this->post->slug. '/update', $this->post->toArray());
-        $response->assertStatus(404);
+        $this->actingAs($this->user)->put('/dashboard/'. $this->post->slug. '/update', $this->post->toArray())->assertStatus(404);
     }
 
     public function test_authenticated_should_not_be_able_to_delete_a_post()
     {
-        $response = $this->delete('/dashboard/'. $this->post->slug. '/delete');
-        $response->assertStatus(404);
+        $this->delete('/dashboard/'. $this->post->slug. '/delete')->assertStatus(404);
     }
 }

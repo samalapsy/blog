@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Models\Post;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use App\Exceptions\NoPostToCacheException;
-use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PostService {
 
@@ -39,37 +38,30 @@ class PostService {
             
             $response = $query->paginate(Config::get($is_public ? 'blog.pagination_count.posts.public' : 'blog.pagination_count.post.dashboard'))->withQueryString();
             if($response->total() <=0 ){
-                throw new NoPostToCacheException('No Post Found to cache');
+                throw new NotFoundHttpException('No Post Found to cache');
             }
-            // Pay attention to the items you're caching, so as not to overload the memory with junks   
-            // Just add a toArray() method to the result.
             return $response;
         });
     }
 
     private function getPost($request, $is_public=true)
     {
-        $full_url = $request->fullUrl();
-        $caching_key = $is_public ? auth()->id().'-user_pag-' : 'listings-'.$full_url;
+        $query = $is_public ? Post::publishedPosts()->with('user') : Post::myPosts();
+        $request->whenFilled('publication_date', function ($input) use ($query) {
+            $query->orderBy('publication_date', $input ?? 'desc');
+        }, function() use($query){
+            $query->orderBy('id', 'desc');
+        });
 
+        if($is_public)
+            $query->orderBy('published_at', 'desc');
         
-            $query = $is_public ? Post::publishedPosts()->with('user') : Post::myPosts();
-            $request->whenFilled('publication_date', function ($input) use ($query) {
-                $query->orderBy('publication_date', $input ?? 'desc');
-            }, function() use($query){
-                $query->orderBy('id', 'desc');
-            });
+        $response = $query->paginate(Config::get($is_public ? 'blog.pagination_count.posts.public' : 'blog.pagination_count.posts.dashboard'))->withQueryString();
+        if($response->total() <=0 ){
+            throw new NotFoundHttpException('No Post Found to cache');
+        }
 
-            if($is_public)
-                $query->orderBy('published_at', 'desc');
-            
-            $response = $query->paginate(Config::get($is_public ? 'blog.pagination_count.posts.public' : 'blog.pagination_count.posts.dashboard'))->withQueryString();
-            if($response->total() <=0 ){
-                throw new Exception('No Post Found to cache');
-            }
-            // Pay attention to the items you're caching, so as not to overload the memory with junks   
-            // Just add a toArray() method to the result.
-            return $response;
+        return $response;
     }
 
     public function getPostDetails($post)
@@ -79,7 +71,6 @@ class PostService {
 
         return Cache::rememberForever($post->slug, function() use ($post){
             return $post->load('user');
-            // ->toArray();
         });
     }
 

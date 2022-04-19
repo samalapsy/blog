@@ -17,16 +17,27 @@ class RegistrationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_new_users_can_register()
+    public function test_registration_password_validation()
     {
-        $response = $this->post('/register', [
+        $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-        ]);
+        ])->assertSessionHasErrors()
+        ->assertStatus(302);
+    }
+    public function test_new_users_can_register()
+    {
+        $this->withoutExceptionHandling();
+        $response = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'PazWord@1!',
+            'password_confirmation' => 'PazWord@1!',
+        ])->assertStatus(302);
 
-        $this->assertAuthenticated('web');
+        $this->assertAuthenticated();
         $response->assertRedirect(RouteServiceProvider::HOME);
     }
 }

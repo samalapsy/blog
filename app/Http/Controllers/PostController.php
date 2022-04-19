@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\NoPostToCacheException;
-use Error;
 use Exception;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\Post\PostRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Database\QueryException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PostController extends Controller
 {
@@ -26,14 +24,13 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $query_parameters = $request->query();
-        $results = null;
+        $results = [];
         try {
             $results = $this->postService->getMyPosts($request, false);
             return view('dashboard.posts.index', compact('results', 'query_parameters'));
-        } catch (NoPostToCacheException | Exception $e) {
+        } catch (NotFoundHttpException | Exception $e) {
             Log::critical('[PostController:index]'. json_encode($e));
             return view('dashboard.posts.index', compact('results','query_parameters'))->with('error', 'Unable to get blog posts, please try again');
-            // return back()->with('error', 'Unable to get blog posts, please try again');
         }
     }
 

@@ -7,9 +7,9 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Log;
-use App\Exceptions\NoPostToCacheException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class HomePageController extends Controller
 {
@@ -19,16 +19,16 @@ class HomePageController extends Controller
         $this->postService = $postService;
     }
 
-    public function index(Request $request, )
+    public function index(Request $request )
     {
         $query_parameters = $request->query();
-        $results = null;
+        $results = [];
         try {
             $results = $this->postService->getPublicPosts($request);
             return view('public.index', compact('results', 'query_parameters'));   
-        } catch (NoPostToCacheException | Exception $e) {
+        } catch (NotFoundHttpException | Exception $e) {
             Log::critical('[PostController@index]'. json_encode($e));
-            return view('public.index', compact('query_parameters', 'results'))->withError('No Blog posts found, please try again after some minutes');
+            return view('public.index', compact('results', 'query_parameters'))->withError('No Blog posts found, please try again after some minutes');
         }
            
     }

@@ -10,7 +10,7 @@
             <div class=" bg-white overflow-hidden shadow-sm sm:rounded-lg">
 
                 <div class="px-6 pt-3 pb-16 bg-white border-b border-gray-200 ">
-                    @if($results)
+                    @if(@$results)
                     <div class="grid gap-4 md:grid-cols-3">
                         @forelse ($results as $item)
                         <div class="card mt-8 bg-gray-100 hover:bg-gray-200 py-5 px-4 rounded ">
@@ -56,8 +56,8 @@
                     <div class="justify-center py-4">
                         <h2 class="text-3xl">No Post(s) Found.</h2>
                     </div>
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
     </div>

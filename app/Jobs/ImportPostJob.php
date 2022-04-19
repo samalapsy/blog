@@ -3,11 +3,12 @@
 namespace App\Jobs;
 
 use App\Models\Post;
-use App\Models\User;
+use Exception;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use LDAP\Result;
 
 class ImportPostJob implements ShouldQueue
 {
@@ -47,9 +49,10 @@ class ImportPostJob implements ShouldQueue
             }
     
             if($response->ok() && $response->successful()){
-                $results = $response->json();
-                if($results && count($results['data']) > 0){
-                    $chucked_results = array_chunk(array_map(function($item){
+                $results = collect($response->json());
+                if($results->has('data')){
+                    $data = (array) $results->get('data');
+                    $chucked_results = array_chunk( array_map(function($item){
                         return array_merge( $item,[
                             'user_id' => 1,
                             'slug' => Str::slug($item['title']),
@@ -58,23 +61,25 @@ class ImportPostJob implements ShouldQueue
                             'publication_date' => Carbon::create($item['publication_date'])->toDateTimeString(), // Defensive programming
     
                         ]);
-                    }, $results['data']), 1000);
+                    }, $data), 1000);
     
                     foreach($chucked_results as $posts){
                         Post::insertOrIgnore($posts);
                         Log::info('[ImportPostJob:handle] == Chunk inserted '. count($posts) . ' posts');
                     }
-    
+
                     return 1;
-                }else{
-                    Log::critical('[ImportPostJob:handle] == No Posts Returned from endpoint', $response);
                 }
+
+                Log::critical('[ImportPostJob:handle] == No Posts Returned from endpoint'. json_encode($response));
+                return 0;
             }else{
-                Log::critical('[ImportPostJob:handle] == ', $response); // alert system should pick this up
+                return 0;
+                Log::critical('[ImportPostJob:handle] == '. json_encode($response)); // alert system should pick this up
             }
-        } catch (\Exception $e) {
-            dd($e);
-            Log::critical('[ImportPostJob:handle] Exception == ', $e); // alert system should pick this up
+        } catch (ModelNotFoundException | Exception $e) {
+            Log::critical('[ImportPostJob:handle] Exception == ' . json_encode($e)); // alert system should pick this up
+            return 0;
         }
     }
 }

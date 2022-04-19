@@ -25,7 +25,7 @@ class PostFactory extends Factory
             'user_id' => random_int(1, 1001),
             'title' => $title,
             'slug' => Str::slug($title),
-            'description' => $this->faker->paragraph(6),
+            'description' => $this->faker->paragraph(25),
             'publication_date' => Carbon::now()->addMinute(rand(0,99)),
         ];
     }

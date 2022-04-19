@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ImportPostJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ImportPostController extends Controller
 {
@@ -19,11 +20,15 @@ class ImportPostController extends Controller
             'import_post' => 'required|string'
         ]);
 
-        if(!ImportPostJob::dispatch()){
-            return redirect()->back()->with('type', 'error')->with('message', 'An error occrued while trying to schedule post import, please try again later');
+        try {
+            ImportPostJob::dispatch();
+            return back()->with('type', 'success')->with('message', 'Your posts have been scheduled to be imported. 😉');
+        } catch (\Exception $e) {
+            Log::critical("[ImportPostController:store] === ". json_encode($e));
+            return back()->with('type', 'error')->with('message', 'An error occrued while trying to schedule post import, please try again later');
+
         }
 
-        return back()->with('type', 'success')->with('message', 'Your posts have been scheduled to be imported. 😉');
     }
 
     

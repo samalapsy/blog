@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 Str::macro('postReadTime', function(...$text) {
@@ -7,8 +8,6 @@ Str::macro('postReadTime', function(...$text) {
     $minutesToRead = round($totalWords / 200);
     return (int)max(1, $minutesToRead);
 });
-
-// echo Str::postReadTime($post->text). ' min read';
 
 
 function truncate(string $string, int $limit = 100) : String
@@ -29,7 +28,18 @@ function getPostReadTime($string) : String
 
 
 function getUserFirstname($string) : String
-{
-    
+{   
     return !is_null($string) ? Str::of($string)->explode(' ')[0] : 'NA';
+}
+
+function forgetCache($key_name) : int
+{
+    $redis = Cache::getRedis();
+    $keys = $redis->keys("*$key_name*");
+    $count = 0;
+    foreach ($keys as $key) {
+        $redis->del($key);
+        $count++;
+    }      
+    return $count;
 }

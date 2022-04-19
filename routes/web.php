@@ -23,11 +23,11 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::get('/', [PostController::class, 'index']);
     
     Route::resource('posts', PostController::class)->only(['index', 'create', 'store', 'show'])->parameters([
-        'index' => 'sort'
+        'index' => 'publication_date'
     ]);
     Route::resource('import-posts', ImportPostController::class)->only(['create', 'store']);
 });
 
 require __DIR__.'/auth.php';
 
-Route::get('/{post}', [HomePageController::class, 'showPost'])->name('post-details');
+Route::get('/{post}', [HomePageController::class, 'showPost'])->name('post-details')->middleware('cache.headers:public;max_age=2628000;etag');

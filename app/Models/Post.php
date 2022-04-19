@@ -2,17 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Post extends Model
 {
     use HasFactory;
 
+    public const USER_LISTING_CACHE_TAG = 'user-listing';
+    public const PUBLIC_LISTING_CACHE_TAG = 'public-listing';
+
 
     protected $fillable = [
         'user_id', 'title', 'slug', 'description', 'publication_date', 'published_at', 'is_published'
+    ];
+
+    protected $casts = [
+        'publication_date' => 'datetime',
+        'published_at' => 'datetime',
+        'is_published' => 'boolean',
     ];
 
 
@@ -20,12 +32,6 @@ class Post extends Model
     {
         return false;
     }
-
-    protected $casts = [
-        'publication_date' => 'datetime',
-        'published_at' => 'datetime',
-        'is_published' => 'boolean',
-    ];
 
     public function getRouteKeyName()
     {
@@ -37,6 +43,11 @@ class Post extends Model
         return 'string';
     }
 
+    static function forgetCachedPosts() : void
+    {
+        forgetCache('listing');
+    }
+
     
     public function scopeSort($query, $criteria)
     {
@@ -46,33 +57,23 @@ class Post extends Model
         return $query->whereIsPublished(true)->whereNotNull('published_at')->whereNotNull('published_at');
     }
 
-    public function scopeMyPosts($query)
+    public function scopeMyPosts($query) : Builder
     {
         return $query->whereUserId(auth()->id());
     }
 
-    public function scopePublishedPosts($query)
+    public function scopePublishedPosts($query) : Builder
     {
         return $query->whereIsPublished(true)->whereNotNull('published_at');
     }
 
-    public function scopePendingScheduledPosts($query)
+    public function scopePendingScheduledPosts($query) : Builder
     {
-        return $query->whereIsPublished(false)->whereNull('published_at');
+        return $query->whereIsPublished(false)->whereNull('published_at')->where('publication_date', '<', now());
     }
 
-    public function scopeSystemAdminPosts($query)
+    public function user() : BelongsTo
     {
-        return $query->whereTypUserId(1);
-    }
-
-    public function scopePopular($query)
-    {
-        return $query->where('views', '>', Config::get('blog.popular_post_view_count', 100));
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->select('id', 'name','email');
     }
 }

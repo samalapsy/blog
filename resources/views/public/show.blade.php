@@ -1,7 +1,7 @@
 @section('seo')
-<meta property='og:title' content='{{ $result->title }}'/>
+<meta property='og:title' content='{{ @$result->title }}'/>
 <meta property='og:image' content='//media.example.com/ 1234567.jpg'/>
-<meta property='og:description' content='{{ truncate($result->description) }}'/>
+<meta property='og:description' content='{{ truncate(@$result->description) }}'/>
 <meta property='og:url' content='{{ $url }}' />
 @endsection
 

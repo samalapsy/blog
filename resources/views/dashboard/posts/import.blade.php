@@ -10,8 +10,8 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
 
-                    @if(Session::get('message'))
-                        <x-alert-panel message="{{ Session::get('message') }}"  type="{{ Session::get('type') }}" />
+                    @if(session('message'))
+                        <x-alert-panel message="{{ session('message') }}"  type="{{ session('type') }}" />
                     @endif
 
                     Please note that post imported cannot be updated or deleted. Your blog post would be imported from this url: <pre>{{ config('blog.remote_blog_post_import_url') }}</pre>.

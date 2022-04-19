@@ -5,10 +5,10 @@ return [
     'remote_blog_post_import_url'  => env('BLOG_IMPORT_URL'),
     'caching' => [
         'public' =>[
-            'blog-listing' =>  60 * 60 * 3
+            'blog-listing' => 60* 30
         ],
         'dashboard' =>[
-            'listing' =>  60 * 60 * 3
+            'listing' => 60* 30
         ]
     ],
     'pagination_count' =>[

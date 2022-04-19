@@ -20,14 +20,14 @@
                         <div class="mt-5 md:mt-0 md:col-span-2">
 
                             <!-- Filter -->
+                            @if($results)
                             <div class="mb-4">
-                                @if($results)
                                 <form method="GET" action="{{ route('dashboard.posts.index') }}">
                                     <div class="grid grid-cols-6 gap-4">
                                         <div class="col-span-3">
                                             <x-label for="title" :value="__('Sort By Publication Date')" />
                                             <select id="publication_date" name="publication_date"
-                                                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                class="mt-1 block w-64 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                                 <option value="" @selected(isset($query_parameters['publication_date']) && $query_parameters['publication_date']=='' )> &ndash; Select &ndash;</option>
                                                 <option value="asc" @selected(isset($query_parameters['publication_date']) && strtolower($query_parameters['publication_date'])=='asc' )>Ascending</option>
                                                 <option value="desC" @selected(isset($query_parameters['publication_date']) && strtolower($query_parameters['publication_date'])=='desc' )>Descending</option>
@@ -46,7 +46,7 @@
                                         </div>
                                     </div>
                                 </form>
-                                @endif
+
                             </div>
 
                             <table class="w-full">
@@ -95,6 +95,12 @@
                                     </tr>
                                 </tfoot>
                             </table>
+
+                            @else
+                            <div class="justify-center py-4">
+                                <h2 class="text-3xl"> {{ session('error', 'No Post(s) Found.') }}</h2>
+                            </div>
+                            @endif
 
 
 

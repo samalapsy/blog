@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->longText('description');
-            $table->timestamp('publication_date')->comment('The date and time posts would become availableto the public');
-            $table->timestamp('published_at')->nullable()->comment('The date and time post was published by the system');
+            $table->dateTime('publication_date')->nullable()->comment('The date and time posts would become availableto the public');
+            $table->dateTime('published_at')->nullable()->comment('The date and time post was published by the system');
             $table->boolean('is_published')->default(false)->comment('True if blog post is already published');
             $table->timestamps();
 

@@ -66,8 +66,6 @@
     @push('scripts')
     <script>
         function autoSetCurrentDateAndTime(e) {
-            // console.log(e.target);
-            // date('Y-m-d')
             let now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             e.target.value = now.toISOString().slice(0, 16);
@@ -86,9 +84,6 @@
                 .then((submit) => {
                     if (submit) {
                         e.target.submit();
-                        /* swal("Poof! Your imaginary file has been deleted!", {
-                            icon: "success",
-                        }); */
                     }
                 });
         }

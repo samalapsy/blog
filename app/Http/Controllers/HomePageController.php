@@ -2,54 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
-use App\Services\PostService;
 use Exception;
+use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use App\Services\PostService;
 use Illuminate\Support\Facades\Log;
+use App\Exceptions\NoPostToCacheException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 
 class HomePageController extends Controller
 {
+    private $postService;
 
-    public function __construct(Type $var = null) {
-        $this->var = $var;
+    public function __construct(PostService $postService) {
+        $this->postService = $postService;
     }
 
-    public function index(Request $request, PostService $postService)
+    public function index(Request $request, )
     {
-        
         $query_parameters = $request->query();
+        $results = null;
         try {
-            $results = $postService->getPublicPosts($request);
-            return view('public.index', compact('results', 'query_parameters'));
-        } catch (Exception $e) {
-            Log::critical('[PostController@index]', $e);
-            return view('public.index', compact('query_parameters'))->with('error', 'Unable to get blog posts, please try again');
+            $results = $this->postService->getPublicPosts($request);
+            return view('public.index', compact('results', 'query_parameters'));   
+        } catch (NoPostToCacheException | Exception $e) {
+            Log::critical('[PostController@index]'. json_encode($e));
+            return view('public.index', compact('query_parameters', 'results'))->withError('No Blog posts found, please try again after some minutes');
         }
-    
-        return view('public.index', compact('results'));
-        
+           
     }
 
 
     public function showPost(Post $post)
     {
-        $result = Cache::rememberForever($post->slug, function() use ($post){
-            
-            return $post->load('user');
-        });
-
-        $url = url()->full();
-
-        return view('public.show', compact('url', 'result'));
+        try {
+            $result = ($this->postService->getPostDetails($post));
+            $url = url()->full();
+            return view('public.show', compact('url', 'result'));
+        } catch (ModelNotFoundException | RelationNotFoundException | Exception $e) {
+            return back()->withError($e->getMessage())->withInput();
+        }
     }
-
-    public function searchResult()
-    {
-        $results = [];
-        return view('public.search-result', compact('results'));
-    }
-
 
 }

@@ -7,11 +7,12 @@ Add or update the following env varaibles.
 
 - BLOG_IMPORT_URL -> https://sq1-api-test.herokuapp.com/posts
 - LOG_CHANNEL -> daily
-- APP_TIMEZONE -> (optional), you'll need this if you want the app to run in your time zone.
 - CACHE_DRIVER -> redis
+- REDIS_CLIENT=predis
 - QUEUE_CONNECTION -> redis
 - DB_ENGINE -> (optional) innodb
 - APP_DEBUG -> false
+- APP_TIMEZONE -> (optional), you'll need this if you want the app to run in your time zone.
 
 ## Installation
 

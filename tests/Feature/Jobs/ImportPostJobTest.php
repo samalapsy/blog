@@ -28,7 +28,6 @@ class ImportPostJobTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->create();
         $this->assertModelExists($this->user);
-        // $this->withoutExceptionHandling(); 
     }
 
     public function test_import_post_screen_can_be_rendered()
@@ -47,8 +46,6 @@ class ImportPostJobTest extends TestCase
 
     public function test_import_post_button_is_sent_to_dispatch_job()
     {
-        // $response = $this->be($this->user)
-        // 
         $this->actingAs($this->user);
         $response =$this->followingRedirects()->post(route('dashboard.import-posts.store'));
         Queue::fake();
@@ -63,7 +60,6 @@ class ImportPostJobTest extends TestCase
         Queue::fake();
         Queue::assertNothingPushed(ImportPostJob::class);
         $response->assertStatus(200);
-        // $response->assertSee('Your posts have been scheduled to be imported. 😉');
     }
 
 

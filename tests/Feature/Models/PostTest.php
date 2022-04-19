@@ -42,7 +42,6 @@ class PostTest extends TestCase
         $this->assertDatabaseCount('posts', 20);
         $response = $this->get('/');
         $response->assertStatus(200);
-        // $response->assertSee($posts->first()->title);
 
     }
 

@@ -18,10 +18,10 @@ Add or update the following env varaibles.
 
 Ensure you have the following prerequisite on your machine
 
-- PHP >=7.3 AND <= 8.0
+- PHP >=7.3  but <= 8.0
 - MySQL
 - Redis
-- comoposer update // we'll need the dev dependencies for the testing
+- RUN `composer install` to install the vendor files // we'll need the dev dependencies for the testing
 - Run `php artisan migrate --seed` // this would seed over 30k data and 1k users
 - Run `php artisan view:cache`
 - Run `php artisan route:cache`
